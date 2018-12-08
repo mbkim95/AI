@@ -24,12 +24,12 @@ class NeuralNet(nn.Module):
 
 start_time = time.time()                                                                # 시작 시간 측정
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')                   # cuda를 쓸지 cpu를 쓸지 세팅
-epoch, batch_size = 10000, 20                                                           # 학습 epoch와 batch_size 설정
+epoch, batch_size = 1000, 25                                                            # 학습 epoch와 batch_size 설정
 
-input_matrix, target_matrix, features_counts = preprocess('./student/student-mat.csv')                             # 데이터 전처리,              feature_counts -> 특성 개수
+input_matrix, target_matrix, features_counts = preprocess('./student/student-por.csv')  # 데이터 전처리,              feature_counts -> 특성 개수
 ratio = 10                                                                              # 교차검증 비율 설정
 input_arrays, target_arrays = cross_validation(ratio, input_matrix, target_matrix)      # 교차검증하도록 세팅
-# criterion = nn.CrossEntropyLoss()                                                       # cost함수 설정
+# criterion = nn.CrossEntropyLoss()                                                     # cost함수 설정
 criterion = nn.MSELoss()
 
 #  Train Model

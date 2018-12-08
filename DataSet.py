@@ -76,6 +76,11 @@ def getTargetData(data):
     target = data[:,-1]
     return target
 
+def process(data):
+    input_matrix, target_matrix, features_counts = getDataSet(data)
+
+    return input_matrix, target_matrix, features_counts
+
 def preprocess(data):
     input_matrix, target_matrix, features_counts = getDataSet(data)
 
@@ -128,5 +133,3 @@ def cross_validation(ratio, input_data, target_data):                        # ê
         target_arrays.append(target_data[start:end])
     # return [input_arrays[idx] for idx in indexes], [target_arrays[idx] for idx in indexes]
     return input_arrays, target_arrays
-
-input_matrix, target_matrix, features_counts = getDataSet("./student/student-mat.csv")
