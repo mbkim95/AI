@@ -8,15 +8,13 @@ from DataSet import *
 class NeuralNet(nn.Module):
     def __init__(self, input_size, output_size):
         super(NeuralNet, self).__init__()
-        self.input_layer = nn.Linear(input_size, 10)
-        self.L1 = nn.Linear(10, 6)
-        self.L2 = nn.Linear(6, 4)
-        self.output_layer = nn.Linear(4, output_size)
+        self.input_layer = nn.Linear(input_size, 120)
+        self.L1 = nn.Linear(120, 100)
+        self.output_layer = nn.Linear(100, output_size)
 
     def forward(self, x):
         x = F.relu(self.input_layer(x))
         x = F.relu(self.L1(x))
-        x = F.relu(self.L2(x))
         x = self.output_layer(x)
         return x
 
@@ -32,6 +30,7 @@ def train(model, input_data, target_data, optimizer, epoch):
     # In training progress
     # 1. turn on training mode
     model.train()
+
     for batch_idx, (data, target) in enumerate(zip(input_data, target_data)):
         # Input data & matched real numbers
         data, target = data.to(device), target.to(device)
@@ -48,18 +47,19 @@ def train(model, input_data, target_data, optimizer, epoch):
         # 5. Backpropagation & optimization
         loss.backward()
         optimizer.step()
-        if batch_idx % 50 == 0:
+        if batch_idx % 100 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx, len(input_data),
                     100. * batch_idx / len(input_data), loss.item()))
 
-def test(model, input_train, input_target):
+def test(model, input_test, input_target):
     model.eval()
     correct = 0
-    for data, target in zip(input_train, input_target):
+    for data, target in zip(input_test, input_target):
         output_data = model(data)
-        index = output_data.long()
-        if index == target:
+        value = torch.round(output_data).long()
+        # value = value.long()
+        if value == target:
             correct += 1
     percentage = round(100 * (correct / len(input_target)))
     print('Percentage:{}%({}/{})'.format(percentage, correct, len(input_target)))
@@ -78,40 +78,40 @@ def divide_Dataset(input, target, device, batch_size, i):
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # 1. Model representation
-    input_data, target_data, col = preprocess('./student/student-mat.csv')
+    train_input, train_target, test_input, test_target, col = preprocess('./student/student-por.csv')
     ratio = 10
 
     # if you want cross validation
-    input, target = cross_validation(ratio, input_data, target_data)
+    # input, target = cross_validation(ratio, input_data, target_data)
 
     ##
     model = NeuralNet(col, 1).to(device)
-    model.apply(init_weights)
+    # model.apply(init_weights)
     # 2. Setup optimizer
-    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
-    epoch_range, batch = 50, 5
-
-    # #
-    # for epoch in range(0, epoch_range):
-    #     # 3. Train the model
-    #     train(model, input_data, target_data, optimizer, epoch)
-    #     # 4. Evaluate the training model
-    #     test(model, input_data, target_data)
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
+    epoch_range, batch = 500, 5
 
     #
-    train_values, test_values = [], []
-    for idx, (x_test, y_test) in enumerate(zip(input, target)):
-        x_train = torch.Tensor([], device=device)
-        y_train = torch.LongTensor([], device=device)
-        for train_idx, (x, y) in enumerate(zip(input, target)):
-            if train_idx != idx:
-                x_train = torch.cat((x_train, x), 0)  # x_train과 x을 이어붙임
-                y_train = torch.cat((y_train, y), 0)  # y_train과 y를 이어붙임
+    for epoch in range(0, epoch_range):
+        # 3. Train the model
+        train(model, train_input, train_target, optimizer, epoch)
+        # 4. Evaluate the training model
+    test(model, test_input, test_target)
 
-                train(model, x_train, y_train, optimizer, idx)
 
-                test(model, x_test, y_test)
-
+    #
+    # train_values, test_values = [], []
+    # for idx, (x_test, y_test) in enumerate(zip(input, target)):
+    #     x_train = torch.Tensor([], device=device)
+    #     y_train = torch.LongTensor([], device=device)
+    #     for train_idx, (x, y) in enumerate(zip(input, target)):
+    #         if train_idx != idx:
+    #             x_train = torch.cat((x_train, x), 0)  # x_train과 x을 이어붙임
+    #             y_train = torch.cat((y_train, y), 0)  # y_train과 y를 이어붙임
+    #
+    #             train(model, x_train, y_train, optimizer, idx)
+    #
+    #             test(model, x_test, y_test)
 
 if __name__ == '__main__':
     main()

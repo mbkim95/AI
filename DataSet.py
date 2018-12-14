@@ -66,7 +66,10 @@ def getDataSet(data_filename):
 
     data.loc[data.romantic=='yes', 'romantic'] = 1
     data.loc[data.romantic=='no', 'romantic'] = 0
-    return getInputData(torch.tensor(data.values)), getTargetData(torch.tensor(data.values)).long(), getInputData(torch.tensor(data.values)).shape[1]
+    limit = round(data.shape[0]*0.8)
+    train = data[:limit]
+    test = data[limit:]
+    return getInputData(torch.tensor(train.values)), getTargetData(torch.tensor(train.values)).long(), getInputData(torch.tensor(test.values)), getTargetData(torch.tensor(test.values)).long(), getInputData(torch.tensor(data.values)).shape[1]
 
 def getInputData(data):
     ret = data[:, :-1]
@@ -76,26 +79,31 @@ def getTargetData(data):
     target = data[:,-1]
     return target
 
-def process(data):
-    input_matrix, target_matrix, features_counts = getDataSet(data)
-
-    return input_matrix, target_matrix, features_counts
-
 def preprocess(data):
-    input_matrix, target_matrix, features_counts = getDataSet(data)
+    train_input_matrix, train_target_matrix, test_input_matrix, test_target_matrix, features_counts = getDataSet(data)
 
-    input_matrix = torch.t(input_matrix).numpy()
-    input_matrix = np.array(input_matrix, dtype=np.float32)
+    train_input = torch.t(train_input_matrix).numpy()
+    train_input = np.array(train_input, dtype=np.float32)
 
-    for i, j in enumerate(input_matrix):
+    test_input = torch.t(test_input_matrix).numpy()
+    test_input = np.array(test_input, dtype=np.float32)
+
+    for i, j in enumerate(train_input):
         j = normalize(j)
-        j = standardize(j)
-        input_matrix[i] = j
+        # j = standardize(j)
+        train_input[i] = j
 
-    input_matrix = torch.from_numpy(input_matrix)
-    input_matrix = torch.t(input_matrix)
+    for i, j in enumerate(test_input):
+        j = normalize(j)
+        # j = standardize(j)
+        test_input[i] = j
 
-    return input_matrix, target_matrix, features_counts
+    train_input = torch.from_numpy(train_input)
+    train_input = torch.t(train_input)
+
+    test_input = torch.from_numpy(test_input)
+    test_input = torch.t(test_input)
+    return train_input, train_target_matrix, test_input, test_target_matrix, features_counts
 
 def normalize(data):                                    # 데이터를 0 ~ 1 사이 값으로 바꾸는 것
     min_data, max_data = data.min(), data.max()
