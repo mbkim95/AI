@@ -8,13 +8,13 @@ from DataSet import *
 class NeuralNet(nn.Module):
     def __init__(self, input_size, output_size):
         super(NeuralNet, self).__init__()
-        self.input_layer = nn.Linear(input_size, 120)
-        self.L1 = nn.Linear(120, 100)
-        self.output_layer = nn.Linear(100, output_size)
+        self.input_layer = nn.Linear(input_size, 20)
+        # self.L1 = nn.Linear(120, 100)
+        self.output_layer = nn.Linear(20, output_size)
 
     def forward(self, x):
         x = F.relu(self.input_layer(x))
-        x = F.relu(self.L1(x))
+        # x = F.relu(self.L1(x))
         x = self.output_layer(x)
         return x
 
@@ -37,13 +37,13 @@ def train(model, input_data, target_data, optimizer, epoch):
         # 2. Reset optimizer's parameters' gradient
         optimizer.zero_grad()
         # 3. Predict the result(output) with the model
-        output = model(input_data)
-        target_data = target_data.float()
+        output = model(data)
+        target = target.float()
         output = torch.squeeze(output)
         # 4. Calculate the loss(cost). Loss
         # The loss indicates how different the predicted value is from the actual value
         criterion = nn.MSELoss()
-        loss = criterion(output, target_data)
+        loss = criterion(output, target)
         # 5. Backpropagation & optimization
         loss.backward()
         optimizer.step()
@@ -89,7 +89,7 @@ def main():
     # model.apply(init_weights)
     # 2. Setup optimizer
     optimizer = optim.SGD(model.parameters(), lr=0.001)
-    epoch_range, batch = 500, 5
+    epoch_range, batch = 1000, 5
 
     #
     for epoch in range(0, epoch_range):

@@ -71,13 +71,16 @@ def getDataSet(data_filename):
     test = data[limit:]
     return getInputData(torch.tensor(train.values)), getTargetData(torch.tensor(train.values)).long(), getInputData(torch.tensor(test.values)), getTargetData(torch.tensor(test.values)).long(), getInputData(torch.tensor(data.values)).shape[1]
 
+
 def getInputData(data):
     ret = data[:, :-1]
     return ret
 
+
 def getTargetData(data):
     target = data[:,-1]
     return target
+
 
 def preprocess(data):
     train_input_matrix, train_target_matrix, test_input_matrix, test_target_matrix, features_counts = getDataSet(data)
@@ -89,12 +92,12 @@ def preprocess(data):
     test_input = np.array(test_input, dtype=np.float32)
 
     for i, j in enumerate(train_input):
-        j = normalize(j)
+        # j = normalize(j)
         # j = standardize(j)
         train_input[i] = j
 
     for i, j in enumerate(test_input):
-        j = normalize(j)
+        # j = normalize(j)
         # j = standardize(j)
         test_input[i] = j
 
